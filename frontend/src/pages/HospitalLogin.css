@@ -1,0 +1,87 @@
+.hospital-login-container {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(to right, #bbdefb, #90caf9, #64b5f6);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hospital-login-form {
+  background-color: #e3f2fd; /* light blue */
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 0 12px 25px rgba(33, 150, 243, 0.3);
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hospital-login-form h2 {
+  color: #1976d2;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.hospital-login-form label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.hospital-login-form input {
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid #1976d2;
+  font-size: 1rem;
+}
+
+.hospital-login-form button {
+  background-color: #1976d2;
+  color: white;
+  padding: 12px 0;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.hospital-login-form button:hover {
+  background-color: #0d47a1;
+}
+
+.login-actions {
+  margin-top: 20px;
+}
+
+.signup-link {
+  background: transparent;
+  color: #1976d2;
+  border: none;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-decoration: underline;
+  margin-bottom: 15px;
+}
+
+.signup-link:hover {
+  color: #0d47a1;
+}
+
+/* Back button style */
+.back-btn {
+  background-color: #555;
+  margin-top: 15px;
+}
+
+.back-btn:hover {
+  background-color: #333;
+}
