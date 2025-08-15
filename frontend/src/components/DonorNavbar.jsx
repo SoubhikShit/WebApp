@@ -1,17 +1,19 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './DonorNavbar.css';
 
 const DonorNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
   };
 
   const handleLogout = () => {
-    // TODO: Add logout logic here (clear tokens, etc.)
+    logout();
     navigate('/');
   };
 
@@ -23,12 +25,6 @@ const DonorNavbar = () => {
       </div>
       
       <div className="nav-links">
-        <button 
-          className={`nav-link ${isActive('/donor/dashboard')}`}
-          onClick={() => navigate('/donor/dashboard')}
-        >
-          Dashboard
-        </button>
         <button 
           className={`nav-link ${isActive('/donor/alerts')}`}
           onClick={() => navigate('/donor/alerts')}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import './Hospital.css';
 
 const BloodData = () => {
@@ -10,6 +11,8 @@ const BloodData = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  
+  const { user } = useAuth();
 
   const bloodInventory = [
     { type: 'A+', quantity: 45, status: 'Available' },
@@ -47,20 +50,27 @@ const BloodData = () => {
       return;
     }
 
+    if (!user || !user._id) {
+      setMessage('Error: Hospital information not available');
+      return;
+    }
+
     try {
       setLoading(true);
       setMessage('');
 
-      // Create request data
+      // Create request data that matches the backend Request model
       const requestPayload = {
         id: `REQ${Date.now()}`, // Generate unique ID
         bloodGroup: requestData.bloodType,
-        message: `Blood request for ${requestData.bloodType} - ${requestData.notes || 'No additional notes'}`,
-        urgency: requestData.urgency === 'normal' ? 'Low' : 
+        message: requestData.notes || `Blood request for ${requestData.bloodType} blood group`,
+        urgency: requestData.urgency === 'normal' ? 'Medium' : 
                  requestData.urgency === 'urgent' ? 'High' : 'Emergency',
         quantity: parseInt(requestData.quantity),
-        hospitalId: 'HOSP001' // This should come from logged-in hospital context
+        hospitalId: user._id // Use the actual hospital ID from context
       };
+
+      console.log('Submitting request payload:', requestPayload);
 
       const response = await fetch('http://localhost:5000/api/requests', {
         method: 'POST',
@@ -71,10 +81,12 @@ const BloodData = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create blood request');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('Request created successfully:', result);
       setMessage('Blood request submitted successfully!');
       
       // Reset form
@@ -86,8 +98,8 @@ const BloodData = () => {
       });
 
     } catch (error) {
-      setMessage(`Error: ${error.message}`);
       console.error('Error submitting request:', error);
+      setMessage(`Error: ${error.message}`);
     } finally {
       setLoading(false);
     }

@@ -1,125 +1,109 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import './Hospital.css';
 
 const Info = () => {
-  const hospitalInfo = {
-    name: "City General Hospital",
-    id: "HOSP001",
-    email: "info@citygeneral.com",
-    phone: "+1 (555) 123-4567",
-    address: {
-      street: "456 Medical Center Drive",
-      city: "New York",
-      state: "NY",
-      zipCode: "10002"
-    },
-    specialties: ["Emergency Medicine", "Cardiology", "Neurology", "Pediatrics"],
-    capacity: 500,
-    established: "1985",
-    accreditation: "Joint Commission Accredited",
-    emergencyServices: true,
-    traumaCenter: "Level I"
-  };
+  const { user } = useAuth();
+  const [hospitalData, setHospitalData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { label: "Total Beds", value: hospitalInfo.capacity, icon: "🏥" },
-    { label: "Years Established", value: new Date().getFullYear() - parseInt(hospitalInfo.established), icon: "📅" },
-    { label: "Specialties", value: hospitalInfo.specialties.length, icon: "⚕️" },
-    { label: "Trauma Level", value: hospitalInfo.traumaCenter, icon: "🚨" }
-  ];
+  useEffect(() => {
+    if (user) {
+      setHospitalData(user);
+      setLoading(false);
+    }
+  }, [user]);
+
+  if (loading) {
+    return <div className="hospital-info-loading">Loading hospital information...</div>;
+  }
+
+  if (!hospitalData) {
+    return <div className="hospital-info-error">No hospital data available</div>;
+  }
 
   return (
-    <div className="info-container">
-      <div className="info-header">
+    <div className="hospital-info-container">
+      <div className="hospital-info-header">
         <h2>Hospital Information</h2>
-        <p>Comprehensive overview of hospital details and capabilities</p>
+        <p>Your hospital details and contact information</p>
       </div>
-
-      <div className="info-content">
+      
+      <div className="hospital-info-content">
         <div className="info-section">
           <h3>Basic Information</h3>
           <div className="info-grid">
             <div className="info-item">
-              <label>Hospital Name</label>
-              <span>{hospitalInfo.name}</span>
+              <label>Hospital ID:</label>
+              <span>{hospitalData.id}</span>
             </div>
-            
             <div className="info-item">
-              <label>Hospital ID</label>
-              <span>{hospitalInfo.id}</span>
-            </div>
-            
-            <div className="info-item">
-              <label>Established</label>
-              <span>{hospitalInfo.established}</span>
-            </div>
-            
-            <div className="info-item">
-              <label>Accreditation</label>
-              <span>{hospitalInfo.accreditation}</span>
+              <label>Hospital Name:</label>
+              <span>{hospitalData.name}</span>
             </div>
           </div>
         </div>
-
+        
         <div className="info-section">
           <h3>Contact Information</h3>
           <div className="info-grid">
             <div className="info-item">
-              <label>Email Address</label>
-              <span>{hospitalInfo.email}</span>
+              <label>Email:</label>
+              <span>{hospitalData.email}</span>
             </div>
-            
             <div className="info-item">
-              <label>Phone Number</label>
-              <span>{hospitalInfo.phone}</span>
+              <label>Phone:</label>
+              <span>{hospitalData.phone}</span>
             </div>
-            
+          </div>
+        </div>
+        
+        <div className="info-section">
+          <h3>Address</h3>
+          <div className="info-grid">
             <div className="info-item full-width">
-              <label>Address</label>
-              <span>
-                {hospitalInfo.address.street}, {hospitalInfo.address.city}, {hospitalInfo.address.state} {hospitalInfo.address.zipCode}
-              </span>
+              <label>Street Address:</label>
+              <span>{hospitalData.address.street}</span>
+            </div>
+            <div className="info-item">
+              <label>City:</label>
+              <span>{hospitalData.address.city}</span>
+            </div>
+            <div className="info-item">
+              <label>State:</label>
+              <span>{hospitalData.address.state}</span>
+            </div>
+            <div className="info-item">
+              <label>ZIP Code:</label>
+              <span>{hospitalData.address.zipCode}</span>
             </div>
           </div>
         </div>
-
+        
         <div className="info-section">
-          <h3>Hospital Statistics</h3>
-          <div className="stats-grid">
-            {stats.map((stat, index) => (
-              <div key={index} className="stat-card">
-                <div className="stat-icon">{stat.icon}</div>
-                <div className="stat-number">{stat.value}</div>
-                <div className="stat-label">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="info-section">
-          <h3>Medical Specialties</h3>
-          <div className="specialties-grid">
-            {hospitalInfo.specialties.map((specialty, index) => (
-              <div key={index} className="specialty-card">
-                <span className="specialty-name">{specialty}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="info-section">
-          <h3>Emergency Services</h3>
-          <div className="emergency-info">
-            <div className="emergency-item">
-              <label>Emergency Services Available</label>
-              <span className={hospitalInfo.emergencyServices ? "status-available" : "status-unavailable"}>
-                {hospitalInfo.emergencyServices ? "Yes" : "No"}
-              </span>
+          <h3>Location Coordinates</h3>
+          <div className="info-grid">
+            <div className="info-item">
+              <label>Latitude:</label>
+              <span>{hospitalData.latitude}</span>
             </div>
-            
-            <div className="emergency-item">
-              <label>Trauma Center Level</label>
-              <span className="trauma-level">{hospitalInfo.traumaCenter}</span>
+            <div className="info-item">
+              <label>Longitude:</label>
+              <span>{hospitalData.longitude}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="info-section">
+          <h3>Account Information</h3>
+          <div className="info-grid">
+            <div className="info-item">
+              <label>Member Since:</label>
+              <span>{new Date(hospitalData.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div className="info-item">
+              <label>Last Updated:</label>
+              <span>{new Date(hospitalData.updatedAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>

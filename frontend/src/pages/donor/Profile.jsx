@@ -1,263 +1,167 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import './Profile.css';
 
 const Profile = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  
-  const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    age: 28,
-    gender: 'Male',
-    email: 'john.doe@email.com',
-    phone: '+1 (555) 123-4567',
-    bloodGroup: 'O+',
-    address: {
-      street: '123 Main Street',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001'
-    },
-    numberOfTimesDonated: 5,
-    lastDonated: '2024-01-15'
-  });
+  const { user } = useAuth();
+  const [donorData, setDonorData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setProfileData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setProfileData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+  useEffect(() => {
+    if (user) {
+      setDonorData(user);
+      setLoading(false);
     }
+  }, [user]);
+
+  if (loading) {
+    return <div className="profile-loading">Loading profile...</div>;
+  }
+
+  if (!donorData) {
+    return <div className="profile-error">No donor data available</div>;
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Never donated';
+    return new Date(dateString).toLocaleDateString();
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    // TODO: Implement save logic
-    console.log('Profile updated:', profileData);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    // TODO: Reset to original data
+  const getDonationStatus = () => {
+    if (!donorData.lastDonated) return 'Eligible to donate';
+    
+    const lastDonation = new Date(donorData.lastDonated);
+    const now = new Date();
+    const daysSinceLastDonation = Math.floor((now - lastDonation) / (1000 * 60 * 60 * 24));
+    
+    const minDays = donorData.gender === 'Female' ? 84 : 56;
+    
+    if (daysSinceLastDonation >= minDays) {
+      return 'Eligible to donate';
+    } else {
+      const remainingDays = minDays - daysSinceLastDonation;
+      return `Eligible in ${remainingDays} days`;
+    }
   };
 
   return (
     <div className="profile-container">
       <div className="profile-header">
         <h2>Donor Profile</h2>
-        <p>Manage your personal information and donation history</p>
+        <p>Your personal information and donation history</p>
       </div>
-
+      
       <div className="profile-content">
         <div className="profile-section">
-          <div className="section-header">
-            <h3>Personal Information</h3>
-            {!isEditing && (
-              <button 
-                className="edit-btn"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Profile
-              </button>
-            )}
-          </div>
-          
+          <h3>Personal Information</h3>
           <div className="profile-grid">
-            <div className="form-group">
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="name"
-                value={profileData.name}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-              />
+            <div className="profile-item">
+              <label>Donor ID:</label>
+              <span>{donorData.id}</span>
             </div>
-            
-            <div className="form-group">
-              <label>Age</label>
-              <input
-                type="number"
-                name="age"
-                value={profileData.age}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-                min="18"
-                max="65"
-              />
+            <div className="profile-item">
+              <label>Full Name:</label>
+              <span>{donorData.name}</span>
             </div>
-            
-            <div className="form-group">
-              <label>Gender</label>
-              <select
-                name="gender"
-                value={profileData.gender}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-select"
-              >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
+            <div className="profile-item">
+              <label>Age:</label>
+              <span>{donorData.age} years</span>
             </div>
-            
-            <div className="form-group">
-              <label>Blood Group</label>
-              <select
-                name="bloodGroup"
-                value={profileData.bloodGroup}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-select"
-              >
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
+            <div className="profile-item">
+              <label>Gender:</label>
+              <span>{donorData.gender}</span>
+            </div>
+            <div className="profile-item">
+              <label>Blood Group:</label>
+              <span className="blood-group">{donorData.bloodGroup}</span>
             </div>
           </div>
         </div>
-
+        
         <div className="profile-section">
           <h3>Contact Information</h3>
           <div className="profile-grid">
-            <div className="form-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                name="email"
-                value={profileData.email}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-              />
+            <div className="profile-item">
+              <label>Email:</label>
+              <span>{donorData.email}</span>
             </div>
-            
-            <div className="form-group">
-              <label>Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                value={profileData.phone}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-              />
+            <div className="profile-item">
+              <label>Phone:</label>
+              <span>{donorData.phone}</span>
             </div>
           </div>
         </div>
-
+        
         <div className="profile-section">
-          <h3>Address Information</h3>
+          <h3>Address</h3>
           <div className="profile-grid">
-            <div className="form-group">
-              <label>Street Address</label>
-              <input
-                type="text"
-                name="address.street"
-                value={profileData.address.street}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-              />
+            <div className="profile-item full-width">
+              <label>Street Address:</label>
+              <span>{donorData.address.street}</span>
             </div>
-            
-            <div className="form-group">
-              <label>City</label>
-              <input
-                type="text"
-                name="address.city"
-                value={profileData.address.city}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-              />
+            <div className="profile-item">
+              <label>City:</label>
+              <span>{donorData.address.city}</span>
             </div>
-            
-            <div className="form-group">
-              <label>State</label>
-              <input
-                type="text"
-                name="address.state"
-                value={profileData.address.state}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-              />
+            <div className="profile-item">
+              <label>State:</label>
+              <span>{donorData.address.state}</span>
             </div>
-            
-            <div className="form-group">
-              <label>ZIP Code</label>
-              <input
-                type="text"
-                name="address.zipCode"
-                value={profileData.address.zipCode}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="form-input"
-              />
+            <div className="profile-item">
+              <label>ZIP Code:</label>
+              <span>{donorData.address.zipCode}</span>
             </div>
           </div>
         </div>
-
+        
+        <div className="profile-section">
+          <h3>Location</h3>
+          <div className="profile-grid">
+            <div className="profile-item">
+              <label>Latitude:</label>
+              <span>{donorData.latitude}</span>
+            </div>
+            <div className="profile-item">
+              <label>Longitude:</label>
+              <span>{donorData.longitude}</span>
+            </div>
+          </div>
+        </div>
+        
         <div className="profile-section">
           <h3>Donation History</h3>
-          <div className="donation-stats">
-            <div className="stat-card">
-              <div className="stat-number">{profileData.numberOfTimesDonated}</div>
-              <div className="stat-label">Total Donations</div>
+          <div className="profile-grid">
+            <div className="profile-item">
+              <label>Total Donations:</label>
+              <span className="donation-count">{donorData.numberOfTimesDonated}</span>
             </div>
-            
-            <div className="stat-card">
-              <div className="stat-number">
-                {profileData.lastDonated ? 
-                  new Date(profileData.lastDonated).toLocaleDateString() : 
-                  'Never'
-                }
-              </div>
-              <div className="stat-label">Last Donation</div>
+            <div className="profile-item">
+              <label>Last Donation:</label>
+              <span>{formatDate(donorData.lastDonated)}</span>
             </div>
-            
-            <div className="stat-card">
-              <div className="stat-number">
-                {profileData.lastDonated ? 
-                  Math.ceil((new Date() - new Date(profileData.lastDonated)) / (1000 * 60 * 60 * 24)) : 
-                  'N/A'
-                }
-              </div>
-              <div className="stat-label">Days Since Last</div>
+            <div className="profile-item">
+              <label>Donation Status:</label>
+              <span className={`status ${getDonationStatus().includes('Eligible') ? 'eligible' : 'waiting'}`}>
+                {getDonationStatus()}
+              </span>
             </div>
           </div>
         </div>
-
-        {isEditing && (
-          <div className="profile-actions">
-            <button className="save-btn" onClick={handleSave}>
-              Save Changes
-            </button>
-            <button className="cancel-btn" onClick={handleCancel}>
-              Cancel
-            </button>
+        
+        <div className="profile-section">
+          <h3>Account Information</h3>
+          <div className="profile-grid">
+            <div className="profile-item">
+              <label>Member Since:</label>
+              <span>{new Date(donorData.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div className="profile-item">
+              <label>Last Updated:</label>
+              <span>{new Date(donorData.updatedAt).toLocaleDateString()}</span>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

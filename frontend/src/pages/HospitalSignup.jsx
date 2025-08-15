@@ -1,341 +1,259 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import '../styles/auth-common.css';
 import './HospitalSignup.css';
 
 const HospitalSignup = () => {
-  const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     id: '',
     name: '',
+    email: '',
     password: '',
     confirmPassword: '',
-    email: '',
     phone: '',
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
-    },
+    address: '',
     latitude: '',
     longitude: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { register, isAuthenticated, getUserType } = useAuth();
 
-  const [errors, setErrors] = useState({});
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const userType = getUserType();
+      if (userType === 'donor') {
+        navigate('/donor/alerts');
+      } else if (userType === 'hospital') {
+        navigate('/hospital/info');
+      }
+    }
+  }, [isAuthenticated, getUserType, navigate]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // ID validation
-    if (!formData.id) {
-      newErrors.id = 'Hospital ID is required';
-    } else if (formData.id.length < 3) {
-      newErrors.id = 'Hospital ID must be at least 3 characters';
-    } else if (!/^[A-Z0-9_-]+$/.test(formData.id)) {
-      newErrors.id = 'Hospital ID can only contain uppercase letters, numbers, hyphens, and underscores';
-    }
-
-    // Name validation
-    if (!formData.name) {
-      newErrors.name = 'Hospital name is required';
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    // Confirm password validation
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    // Email validation
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-
-    // Phone validation
-    if (!formData.phone) {
-      newErrors.phone = 'Phone number is required';
-    }
-
-    // Address validation
-    if (!formData.address.street) newErrors.street = 'Street address is required';
-    if (!formData.address.city) newErrors.city = 'City is required';
-    if (!formData.address.state) newErrors.state = 'State is required';
-    if (!formData.address.zipCode) newErrors.zipCode = 'ZIP code is required';
-
-    // Coordinates validation
-    if (!formData.latitude) {
-      newErrors.latitude = 'Latitude is required';
-    } else if (isNaN(formData.latitude) || formData.latitude < -90 || formData.latitude > 90) {
-      newErrors.latitude = 'Latitude must be between -90 and 90';
-    }
-
-    if (!formData.longitude) {
-      newErrors.longitude = 'Longitude is required';
-    } else if (isNaN(formData.longitude) || formData.longitude < -180 || formData.longitude > 180) {
-      newErrors.longitude = 'Longitude must be between -180 and 180';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (validateForm()) {
-      try {
-        // Convert ID to uppercase
-        const submitData = {
-          ...formData,
-          id: formData.id.toUpperCase(),
-          email: formData.email.toLowerCase()
-        };
+    setError('');
 
-        // Remove confirmPassword from submit data
-        delete submitData.confirmPassword;
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
-        console.log('Hospital Signup Data:', submitData);
-        
-        // TODO: Make API call to backend
-        // const response = await fetch('/api/hospitals/signup', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(submitData)
-        // });
+    setLoading(true);
 
-        alert('Hospital registration successful! Please login.');
-        navigate('/login/hospital');
-      } catch (error) {
-        console.error('Signup error:', error);
-        alert('Registration failed. Please try again.');
-      }
+    try {
+      await register(formData, 'hospital');
+      navigate('/hospital/info');
+    } catch (err) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (isAuthenticated()) {
+    return <div className="auth-container">Redirecting...</div>;
+  }
+
   return (
-    <div className="hospital-signup-container">
-      <form className="hospital-signup-form" onSubmit={handleSubmit}>
-        <h2>🏥 Hospital Registration</h2>
-        <p className="form-subtitle">Create your hospital account</p>
-
-        <div className="form-section">
-          <h3>Hospital Information</h3>
-          
-          <div className="form-group">
-            <label>Hospital ID *</label>
-            <input
-              type="text"
-              name="id"
-              value={formData.id}
-              onChange={handleChange}
-              placeholder="e.g., HOSP001, CITY_GEN"
-              className={errors.id ? 'error' : ''}
-            />
-            {errors.id && <span className="error-message">{errors.id}</span>}
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-logo hospital-logo">
+            🏥
           </div>
-
-          <div className="form-group">
-            <label>Hospital Name *</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter hospital name"
-              className={errors.name ? 'error' : ''}
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-          </div>
+          <h1 className="auth-title">Hospital Registration</h1>
+          <p className="auth-subtitle">Join Blood Warriors as a hospital</p>
         </div>
 
-        <div className="form-section">
-          <h3>Authentication</h3>
-          
-          <div className="form-group">
-            <label>Password *</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Minimum 6 characters"
-              className={errors.password ? 'error' : ''}
-            />
-            {errors.password && <span className="error-message">{errors.password}</span>}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="id" className="form-label">
+                Hospital ID *
+              </label>
+              <input
+                type="text"
+                id="id"
+                name="id"
+                value={formData.id}
+                onChange={handleChange}
+                className="form-input hospital"
+                placeholder="Enter unique hospital ID"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="name" className="form-label">
+                Hospital Name *
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="form-input hospital"
+                placeholder="Enter hospital name"
+                required
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label>Confirm Password *</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              className={errors.confirmPassword ? 'error' : ''}
-            />
-            {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
-          </div>
-        </div>
-
-        <div className="form-section">
-          <h3>Contact Information</h3>
-          
-          <div className="form-group">
-            <label>Email *</label>
+            <label htmlFor="email" className="form-label">
+              Email Address *
+            </label>
             <input
               type="email"
+              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="hospital@example.com"
-              className={errors.email ? 'error' : ''}
+              className="form-input hospital"
+              placeholder="Enter hospital email address"
+              required
             />
-            {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
 
           <div className="form-group">
-            <label>Phone *</label>
+            <label htmlFor="phone" className="form-label">
+              Phone Number *
+            </label>
             <input
               type="tel"
+              id="phone"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              placeholder="+1234567890"
-              className={errors.phone ? 'error' : ''}
+              className="form-input hospital"
+              placeholder="Enter hospital phone number"
+              required
             />
-            {errors.phone && <span className="error-message">{errors.phone}</span>}
           </div>
-        </div>
 
-        <div className="form-section">
-          <h3>Address</h3>
-          
           <div className="form-group">
-            <label>Street Address *</label>
+            <label htmlFor="address" className="form-label">
+              Address *
+            </label>
             <input
               type="text"
-              name="address.street"
-              value={formData.address.street}
+              id="address"
+              name="address"
+              value={formData.address}
               onChange={handleChange}
-              placeholder="123 Main Street"
-              className={errors.street ? 'error' : ''}
+              className="form-input hospital"
+              placeholder="Enter hospital address"
+              required
             />
-            {errors.street && <span className="error-message">{errors.street}</span>}
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label>City *</label>
-              <input
-                type="text"
-                name="address.city"
-                value={formData.address.city}
-                onChange={handleChange}
-                placeholder="City"
-                className={errors.city ? 'error' : ''}
-              />
-              {errors.city && <span className="error-message">{errors.city}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>State *</label>
-              <input
-                type="text"
-                name="address.state"
-                value={formData.address.state}
-                onChange={handleChange}
-                placeholder="State"
-                className={errors.state ? 'error' : ''}
-              />
-              {errors.state && <span className="error-message">{errors.state}</span>}
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>ZIP Code *</label>
-            <input
-              type="text"
-              name="address.zipCode"
-              value={formData.address.zipCode}
-              onChange={handleChange}
-              placeholder="12345"
-              className={errors.zipCode ? 'error' : ''}
-            />
-            {errors.zipCode && <span className="error-message">{errors.zipCode}</span>}
-          </div>
-        </div>
-
-        <div className="form-section">
-          <h3>Location Coordinates</h3>
-          <p className="help-text">Enter the exact coordinates of your hospital location</p>
-          
-          <div className="form-row">
-            <div className="form-group">
-              <label>Latitude *</label>
+              <label htmlFor="latitude" className="form-label">
+                Latitude *
+              </label>
               <input
                 type="number"
+                id="latitude"
                 name="latitude"
                 value={formData.latitude}
                 onChange={handleChange}
-                placeholder="40.7128"
+                className="form-input hospital"
+                placeholder="Enter latitude"
                 step="any"
-                className={errors.latitude ? 'error' : ''}
+                required
               />
-              {errors.latitude && <span className="error-message">{errors.latitude}</span>}
             </div>
 
             <div className="form-group">
-              <label>Longitude *</label>
+              <label htmlFor="longitude" className="form-label">
+                Longitude *
+              </label>
               <input
                 type="number"
+                id="longitude"
                 name="longitude"
                 value={formData.longitude}
                 onChange={handleChange}
-                placeholder="-74.0060"
+                className="form-input hospital"
+                placeholder="Enter longitude"
                 step="any"
-                className={errors.longitude ? 'error' : ''}
+                required
               />
-              {errors.longitude && <span className="error-message">{errors.longitude}</span>}
             </div>
           </div>
-        </div>
 
-        <div className="form-actions">
-          <button type="submit" className="signup-btn">Create Hospital Account</button>
-          <button type="button" className="back-btn" onClick={() => navigate('/login/hospital')}>
-            Already have an account? Login
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
+                Password *
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="form-input hospital"
+                placeholder="Create a password"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="confirmPassword" className="form-label">
+                Confirm Password *
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="form-input hospital"
+                placeholder="Confirm your password"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className={`auth-button hospital ${loading ? 'loading' : ''}`}
+            disabled={loading}
+          >
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
+        </form>
+
+        <div className="auth-links">
+          <span>Already have an account? </span>
+          <Link to="/hospital/login" className="auth-link hospital">
+            Sign In
+          </Link>
+          <br />
+          <Link to="/" className="auth-link hospital">
+            Back to Home
+          </Link>
         </div>
-      </form>
+      </div>
     </div>
   );
 };

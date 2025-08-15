@@ -28,6 +28,23 @@
   margin: 0 auto;
 }
 
+.blood-type-highlight {
+  color: var(--accent-color);
+  font-weight: 700;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--text-primary);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
 .alerts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -68,12 +85,22 @@
   gap: 1rem;
 }
 
-.alert-header h3 {
+.alert-title {
+  flex: 1;
+}
+
+.alert-title h3 {
   color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 600;
-  margin: 0;
-  flex: 1;
+  margin: 0 0 0.5rem 0;
+}
+
+.hospital-name {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: block;
 }
 
 .urgency-badge {
@@ -101,11 +128,26 @@
 }
 
 .alert-message {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.6;
   margin-bottom: 1.5rem;
-  min-height: 60px;
+  padding: 1rem;
+  background: var(--background-secondary);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--accent-color);
+}
+
+.hospital-info {
+  margin-bottom: 1.5rem;
+}
+
+.hospital-location {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .alert-footer {
@@ -113,22 +155,241 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color);
+  padding: 1rem;
+  background: var(--background-secondary);
+  border-radius: var(--border-radius);
 }
 
-.location, .timestamp {
-  color: var(--text-light);
+.quantity {
+  color: var(--text-primary);
   font-size: 0.9rem;
-  font-weight: 500;
+}
+
+.timestamp {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .respond-btn {
-  width: 100%;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.respond-btn.primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.respond-btn.primary:hover {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+}
+
+.respond-btn.secondary {
+  background: transparent;
+  color: var(--accent-color);
+  border: 2px solid var(--accent-color);
+}
+
+.respond-btn.secondary:hover {
+  background: var(--accent-color);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.no-requests {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--background-primary);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-color);
+}
+
+.no-requests-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.no-requests h3 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.no-requests p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.alerts-footer {
+  margin-top: 3rem;
+  padding: 2rem;
+  background: var(--background-primary);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.alerts-footer p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.retry-btn {
+  background: var(--accent-color);
   color: white;
   border: none;
-  padding: 14px 24px;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 1rem;
+}
+
+.retry-btn:hover {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+}
+
+/* Response Modal Styles */
+.response-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.response-modal {
+  background: var(--background-primary);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-heavy);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.response-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.response-modal-header h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.close-btn:hover {
+  background: var(--background-secondary);
+  color: var(--text-primary);
+}
+
+.response-modal-content {
+  padding: 1.5rem;
+}
+
+.request-summary {
+  background: var(--background-secondary);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--accent-color);
+}
+
+.request-summary p {
+  margin: 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.response-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.response-form textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 120px;
+  transition: var(--transition);
+}
+
+.response-form textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1);
+}
+
+.char-count {
+  text-align: right;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.response-modal-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  justify-content: flex-end;
+}
+
+.cancel-btn, .submit-btn {
+  padding: 12px 24px;
+  border: none;
   border-radius: var(--border-radius);
   font-size: 1rem;
   font-weight: 600;
@@ -138,13 +399,34 @@
   letter-spacing: 0.5px;
 }
 
-.respond-btn:hover {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
+.cancel-btn {
+  background: var(--background-secondary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
 }
 
-/* Responsive Design */
+.cancel-btn:hover:not(:disabled) {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.submit-btn {
+  background: var(--accent-color);
+  color: white;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+}
+
+.cancel-btn:disabled, .submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design for Modal */
 @media (max-width: 768px) {
   .alerts-container {
     padding: 1rem;
@@ -152,7 +434,6 @@
   
   .alerts-header {
     padding: 1.5rem;
-    margin-bottom: 2rem;
   }
   
   .alerts-header h2 {
@@ -161,7 +442,7 @@
   
   .alerts-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
   }
   
   .alert-card {
@@ -171,27 +452,36 @@
   .alert-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 1rem;
   }
   
-  .alert-footer {
+  .alert-actions {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .alerts-header h2 {
-    font-size: 1.75rem;
   }
   
-  .alert-card {
+  .respond-btn {
+    width: 100%;
+  }
+
+  .response-modal {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .response-modal-header {
     padding: 1rem;
   }
   
-  .blood-type-badge {
-    font-size: 0.9rem;
-    padding: 6px 12px;
+  .response-modal-content {
+    padding: 1rem;
+  }
+  
+  .response-modal-actions {
+    padding: 1rem;
+    flex-direction: column;
+  }
+  
+  .cancel-btn, .submit-btn {
+    width: 100%;
   }
 }

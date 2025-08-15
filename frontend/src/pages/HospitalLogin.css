@@ -85,3 +85,14 @@
 .back-btn:hover {
   background-color: #333;
 }
+
+/* Hospital-specific styles */
+.hospital-logo {
+  background: linear-gradient(135deg, var(--hospital-primary), var(--hospital-secondary));
+  box-shadow: 0 8px 25px rgba(25, 118, 210, 0.3);
+}
+
+.hospital-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(25, 118, 210, 0.4);
+}

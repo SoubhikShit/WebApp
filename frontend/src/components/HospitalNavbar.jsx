@@ -1,17 +1,19 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './HospitalNavbar.css';
 
 const HospitalNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
   };
 
   const handleLogout = () => {
-    // TODO: Add logout logic here (clear tokens, etc.)
+    logout();
     navigate('/');
   };
 
@@ -40,6 +42,12 @@ const HospitalNavbar = () => {
           onClick={() => navigate('/hospital/bloodbanks')}
         >
           Blood Banks
+        </button>
+        <button 
+          className={`nav-link ${isActive('/hospital/responses')}`}
+          onClick={() => navigate('/hospital/responses')}
+        >
+          Responses
         </button>
       </div>
       

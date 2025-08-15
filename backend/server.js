@@ -29,6 +29,7 @@ app.use('/api/donors', require('./routes/donors'));
 app.use('/api/hospitals', require('./routes/hospitals'));
 app.use('/api/blood-banks', require('./routes/bloodBanks'));
 app.use('/api/requests', require('./routes/requests'));
+app.use('/api/responses', require('./routes/responses'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

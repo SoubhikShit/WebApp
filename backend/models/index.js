@@ -2,5 +2,6 @@
 module.exports = {
   Donor: require('./Donor'),
   Hospital: require('./Hospital'),
-  Request: require('./Request')
+  Request: require('./Request'),
+  Response: require('./Response')
 };

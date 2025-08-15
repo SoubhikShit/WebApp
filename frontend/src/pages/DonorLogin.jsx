@@ -1,55 +1,126 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import '../styles/auth-common.css';
 import './DonorLogin.css';
 
 const DonorLogin = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login, isAuthenticated, getUserType } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const userType = getUserType();
+      if (userType === 'donor') {
+        navigate('/donor/alerts');
+      } else if (userType === 'hospital') {
+        navigate('/hospital/info');
+      }
+    }
+  }, [isAuthenticated, getUserType, navigate]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // For now, just log inputs and navigate to donor dashboard
-    console.log('Donor Login:', { email, password });
-    // TODO: Add real authentication logic here
-    navigate('/donor/dashboard');
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      await login(formData.email, formData.password, 'donor');
+      navigate('/donor/alerts');
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isAuthenticated()) {
+    return <div className="auth-container">Redirecting...</div>;
+  }
+
   return (
-    <div className="donor-login-container">
-      <form className="donor-login-form" onSubmit={handleSubmit}>
-        <h2>Donor Login</h2>
-
-        <label>Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
-          required
-        />
-
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password"
-          required
-        />
-
-        <button type="submit">Login</button>
-
-        <div className="login-actions">
-          <button type="button" className="signup-link" onClick={() => navigate('/signup/donor')}>
-            Don't have an account? Sign up here
-          </button>
-          <button type="button" className="back-btn" onClick={() => navigate('/')}>
-            Back to Home
-          </button>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-logo donor-logo">
+            🩸
+          </div>
+          <h1 className="auth-title">Donor Login</h1>
+          <p className="auth-subtitle">Welcome back! Sign in to your donor account</p>
         </div>
-      </form>
+
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="Enter your email address"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="form-input"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className={`auth-button donor ${loading ? 'loading' : ''}`}
+            disabled={loading}
+          >
+            {loading ? 'Signing In...' : 'Sign In'}
+          </button>
+        </form>
+
+        <div className="auth-links">
+          <span>Don't have an account? </span>
+          <Link to="/donor/signup" className="auth-link">
+            Sign Up
+          </Link>
+          <br />
+          <Link to="/" className="auth-link">
+            Back to Home
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };

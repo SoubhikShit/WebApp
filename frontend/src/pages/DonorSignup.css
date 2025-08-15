@@ -102,10 +102,28 @@
   display: block;
 }
 
+/* Donor-specific styles */
+.donor-logo {
+  background: linear-gradient(135deg, var(--donor-primary), var(--donor-secondary));
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+}
+
+.donor-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(255, 107, 53, 0.4);
+}
+
+/* Form row for side-by-side inputs */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .help-text {

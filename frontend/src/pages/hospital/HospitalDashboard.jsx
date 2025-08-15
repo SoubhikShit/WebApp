@@ -6,6 +6,7 @@ import './Hospital.css';
 import Info from './Info';
 import BloodData from './BloodData';
 import BloodbanksList from './BloodbanksList';
+import Responses from './Responses';
 
 function HospitalDashboard() {
   return (
@@ -16,6 +17,7 @@ function HospitalDashboard() {
           <Route path="info" element={<Info />} />
           <Route path="blooddata" element={<BloodData />} />
           <Route path="bloodbanks" element={<BloodbanksList />} />
+          <Route path="responses" element={<Responses />} />
           <Route path="*" element={<Info />} />
         </Routes>
       </div>

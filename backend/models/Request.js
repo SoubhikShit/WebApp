@@ -112,8 +112,8 @@ requestSchema.statics.findByHospital = function(hospitalId) {
   }).sort({ createdAt: -1 });
 };
 
-// Static method to find request by ID
-requestSchema.statics.findById = function(id) {
+// Static method to find request by custom ID
+requestSchema.statics.findByCustomId = function(id) {
   return this.findOne({ id: id.toUpperCase() });
 };
 
